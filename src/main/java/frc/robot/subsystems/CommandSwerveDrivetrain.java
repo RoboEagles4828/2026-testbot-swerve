@@ -22,6 +22,8 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -59,6 +61,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final DoubleSubscriber seedY = debugTable.getDoubleTopic(SEED_Y).subscribe(0.0);
     private final DoubleSubscriber seedTheta = debugTable.getDoubleTopic(SEED_THETA).subscribe(0.0);
     private final BooleanSubscriber seedTrigger = debugTable.getBooleanTopic(SEED_Trigger).subscribe(false);
+    private final Field2d field = new Field2d();
 
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
@@ -170,6 +173,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        init();
     }
 
     /**
@@ -202,6 +206,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        init();
     }
 
     /**
@@ -241,9 +246,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         debugTable.getDoubleTopic(SEED_THETA).publish().setDefault(0);
         debugTable.getBooleanTopic(SEED_Trigger).publish().setDefault(false);
 
-
-
-
+        SmartDashboard.putData("Field", field);
     }
 
     @Override
@@ -271,7 +274,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 );
                 m_hasAppliedOperatorPerspective = true;
             });
+
         }
+        field.setRobotPose(getState().Pose);
     }
 
     private void startSimThread() {
