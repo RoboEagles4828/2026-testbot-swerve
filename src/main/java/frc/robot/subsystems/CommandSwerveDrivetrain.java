@@ -16,6 +16,10 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.networktables.BooleanSubscriber;
+import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -44,6 +48,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private static final Rotation2d kRedAlliancePerspectiveRotation = Rotation2d.k180deg;
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
+
+    private final String SEED_X = "seedX";
+    private final String SEED_Y = "seedY";
+    private final String SEED_THETA = "seedTheta";
+    private final String SEED_Trigger = "seedTrigger";
+    
+    private final NetworkTable debugTable = NetworkTableInstance.getDefault().getTable("Debug");
+    private final DoubleSubscriber seedX = debugTable.getDoubleTopic(SEED_X).subscribe(0.0);
+    private final DoubleSubscriber seedY = debugTable.getDoubleTopic(SEED_Y).subscribe(0.0);
+    private final DoubleSubscriber seedTheta = debugTable.getDoubleTopic(SEED_THETA).subscribe(0.0);
+    private final BooleanSubscriber seedTrigger = debugTable.getBooleanTopic(SEED_Trigger).subscribe(false);
 
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
@@ -219,6 +234,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public Command sysIdDynamic(SysIdRoutine.Direction direction) {
         return m_sysIdRoutineToApply.dynamic(direction);
     }
+    private void init(){
+        debugTable.getDoubleTopic(SEED_X).publish().setDefault(0);
+        debugTable.getDoubleTopic(SEED_Y).publish().setDefault(0);
+        debugTable.getDoubleTopic(SEED_THETA).publish().setDefault(0);
+        debugTable.getBooleanTopic(SEED_Trigger).publish().setDefault(false);
+
+
+
+
+    }
 
     @Override
     public void periodic() {
@@ -229,6 +254,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
          * Otherwise, only check and apply the operator perspective if the DS is disabled.
          * This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
          */
+        if (seedTrigger.get()){
+            Pose2d seedPose = new Pose2d(seedX.get(), seedY.get(), Rotation2d.fromDegrees(seedTheta.get()));
+
+            resetPose(seedPose);
+
+            debugTable.getBooleanTopic(SEED_Trigger).publish().set(false);
+        }
         if (!m_hasAppliedOperatorPerspective || DriverStation.isDisabled()) {
             DriverStation.getAlliance().ifPresent(allianceColor -> {
                 setOperatorPerspectiveForward(
