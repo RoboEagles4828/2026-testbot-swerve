@@ -246,8 +246,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         debugTable.getDoubleTopic(SEED_Y).publish().setDefault(0);
         debugTable.getDoubleTopic(SEED_THETA).publish().setDefault(0);
         debugTable.getBooleanTopic(SEED_Trigger).publish().setDefault(false);
-
-        SmartDashboard.putData("Field", field);
     }
 
     @Override
@@ -277,7 +275,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
-        field.setRobotPose(getState().Pose);
+        Util4828.FIELD.setRobotPose(getState().Pose);
 
         SmartDashboard.putString("Robot Pose", Util4828.formatPose(getState().Pose));
     }

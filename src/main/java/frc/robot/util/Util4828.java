@@ -16,6 +16,8 @@ public class Util4828 {
     public static final AprilTagFields APRIL_TAG_FIELD_TYPE = AprilTagFields.k2025ReefscapeWelded;
     public static final AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT = AprilTagFieldLayout.loadField(APRIL_TAG_FIELD_TYPE);
  
+    public static final Field2d FIELD = new Field2d();
+
     public static final double DISTANCE_ROBOT_FRAME_NOBUMPERS_TO_CENTER = 0.3556;
 
     public static String formatPose(Pose2d pose) {
