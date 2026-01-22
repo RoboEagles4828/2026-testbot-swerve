@@ -9,12 +9,13 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-
+import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
@@ -40,12 +41,41 @@ public class RobotContainer {
     //public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     //public final Limelight limelight = new Limelight(drivetrain);
     public final Limelight limelight = new Limelight();
+    public final TalonFX ClimbMotor = new TalonFX(15);
 
     public RobotContainer() {
         configureBindings();
     }
 
+    public void climbUp() {
+        ClimbMotor.set(-0.2);
+    }
+
+    public void climbDown() {
+        ClimbMotor.set(0.2);
+
+    }
+
+    public void stopClimber() {
+        ClimbMotor.stopMotor();
+    }
+
+
     private void configureBindings() {
+        joystick.a().onTrue(
+            new InstantCommand(() -> climbDown())
+        );
+        joystick.a().onFalse(
+            new InstantCommand(() -> stopClimber())
+        );
+
+        joystick.b().onTrue(
+            new InstantCommand(() -> climbUp())  
+        );
+        joystick.b().onFalse(
+            new InstantCommand(() -> stopClimber())
+        );
+
         // // Note that X is defined as forward according to WPILib convention,
         // // and Y is defined as to the left according to WPILib convention.
         // drivetrain.setDefaultCommand(
@@ -56,6 +86,8 @@ public class RobotContainer {
         //             .withRotationalRate(-joystick.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
         //     )
         // );
+       
+
 
         // // Idle while the robot is disabled. This ensures the configured
         // // neutral mode is applied to the drive motors while disabled.
